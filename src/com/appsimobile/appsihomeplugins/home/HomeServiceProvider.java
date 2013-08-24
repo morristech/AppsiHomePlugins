@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -113,11 +114,22 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
 
         Bitmap photo = (Bitmap) photoAndName[0];
         String displayName = (String) photoAndName[1];
+        String status = (String) photoAndName[2];
 
         // we only show the image in Appsi, so we add no intent extra
         // add the photo and name
         bundle.putParcelable(HomeServiceContract.DataResponse.EXTRA_LARGE_IMAGE, photo);
-        bundle.putString(HomeServiceContract.DataResponse.EXTRA_TEXT, displayName);
+        bundle.putString(HomeServiceContract.DataResponse.EXTRA_HEADER, displayName);
+
+        if (status == null) {
+            StringBuffer sub = new StringBuffer();
+            sub.append("Android ").append(Build.VERSION.RELEASE).append("\n");
+            sub.append(Build.MANUFACTURER).append("\n");
+            sub.append(Build.MODEL);
+            bundle.putString(HomeServiceContract.DataResponse.EXTRA_TEXT, sub.toString());
+        } else {
+            bundle.putString(HomeServiceContract.DataResponse.EXTRA_TEXT, status);
+        }
 
     }
 
@@ -215,7 +227,7 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
                 new String[]{
                         ContactsContract.Profile.PHOTO_URI,
                         ContactsContract.Profile.DISPLAY_NAME,
-                        ContactsContract.Profile._ID,
+                        ContactsContract.Profile.CONTACT_STATUS,
                 },
                 null,
                 null,
@@ -223,6 +235,7 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
 
         Bitmap photo = null;
         String name = null;
+        String status = null;
 
         if (cursor != null) {
             try {
@@ -238,13 +251,14 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
                         }
                     }
                     name = cursor.getString(1); // index 1: displayName
-                    if (name != null && photo != null) break;
+                    status = cursor.getString(2); // index 1: displayName
+                    if (name != null && photo != null && status != null) break;
                 }
             } finally {
                 cursor.close();
             }
         }
-        return new Object[] {photo, name};
+        return new Object[] {photo, name, status};
     }
 
 }
