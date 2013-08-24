@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.appsimobile.appsihomeplugins"
+    android:versionCode="1"
+    android:versionName="1.0">
+
+
+    <uses-sdk
+        android:targetSdkVersion="18"
+        android:minSdkVersion="14" />
+
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.READ_CALL_LOG"/>
+    <uses-permission android:name="android.permission.READ_PROFILE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+
+    <application
+        android:hardwareAccelerated="true"
+        android:label="@string/application_name"
+        android:icon="@drawable/ic_plugins"
+        >
+
+        <service android:name=".home.HomeServiceProvider"
+                 android:exported="true">
+            <intent-filter>
+                <action android:name="com.appsimobile.appsi.APPSI_HOME_PLUGIN" />
+            </intent-filter>
+        </service>
+        <service android:name=".home.CallLogMonitorService"/>
+
+
+    </application>
+</manifest> 
