@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -117,8 +118,14 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
         // we only show the image in Appsi, so we add no intent extra
         // add the photo and name
         bundle.putParcelable(HomeServiceContract.DataResponse.EXTRA_LARGE_IMAGE, photo);
-        bundle.putString(HomeServiceContract.DataResponse.EXTRA_TEXT, displayName);
+        bundle.putString(HomeServiceContract.DataResponse.EXTRA_HEADER, displayName);
 
+
+        StringBuffer text = new StringBuffer();
+        text.append("Android ").append(Build.VERSION.RELEASE).append("\n");
+        text.append(Build.MANUFACTURER).append("\n");
+        text.append(Build.MODEL);
+        bundle.putString(HomeServiceContract.DataResponse.EXTRA_TEXT, text.toString());
     }
 
     @Override
