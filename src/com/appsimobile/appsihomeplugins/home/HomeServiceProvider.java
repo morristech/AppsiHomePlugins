@@ -11,15 +11,24 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
 import android.util.Log;
+import android.util.SparseArray;
 
+import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
 import com.appsimobile.appsihomeplugins.R;
+import com.appsimobile.appsihomeplugins.dashclock.calendar.CalendarExtension;
+import com.appsimobile.appsihomeplugins.dashclock.gmail.GmailExtension;
+import com.appsimobile.appsihomeplugins.dashclock.nextalarm.NextAlarmExtension;
+import com.appsimobile.appsihomeplugins.dashclock.phone.MissedCallsExtension;
+import com.appsimobile.appsihomeplugins.dashclock.phone.SmsExtension;
+import com.appsimobile.appsihomeplugins.dashclock.weather.WeatherExtension;
 import com.appsimobile.appsisupport.home.AppsiHomeServiceProvider;
+import com.appsimobile.appsisupport.home.FieldDataBuilder;
+import com.appsimobile.appsisupport.home.FieldsBuilder;
 import com.appsimobile.appsisupport.home.HomeServiceContract;
 
 import java.io.IOException;
@@ -32,6 +41,8 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
 
     // define constants, do not change after production.
     // these are used in Appsi to know the field being used
+
+    final SparseArray<DashClockHomeExtension> mDashClockHomeExtensions = new SparseArray<DashClockHomeExtension>();
 
     /**
      * This field opens the downloads list
@@ -58,39 +69,46 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
 
     @Override
     public void onCreate() {
-        super.onCreate();
+        // call before super.onCreate, otherwise the field will not be known
+        mDashClockHomeExtensions.put(DashClockHomeExtension.DASHCLOCK_EXTENSION_CALENDAR, new CalendarExtension(this));
+        mDashClockHomeExtensions.put(DashClockHomeExtension.DASHCLOCK_EXTENSION_GMAIL, new GmailExtension(this));
+        mDashClockHomeExtensions.put(DashClockHomeExtension.DASHCLOCK_EXTENSION_NEXT_ALARM, new NextAlarmExtension(this));
+        mDashClockHomeExtensions.put(DashClockHomeExtension.DASHCLOCK_EXTENSION_MISSED_CALLS, new MissedCallsExtension(this));
+        mDashClockHomeExtensions.put(DashClockHomeExtension.DASHCLOCK_EXTENSION_SMS, new SmsExtension(this));
+        mDashClockHomeExtensions.put(DashClockHomeExtension.DASHCLOCK_EXTENSION_WEATHER, new WeatherExtension(this));
         mHandler = new Handler();
-        Intent i = new Intent(this, CallLogMonitorService.class);
-        startService(i);
+        super.onCreate();
     }
 
     /**
      * This is called when Appsi needs to update a specific field. Fill the
      * bundle with the values that need to be displayed
-     * @param bundle
+     * @param builder
      * @param fieldId
      */
     @Override
-    protected void updateBundleForField(Bundle bundle, int fieldId) {
+    protected void updateBundleForField(FieldDataBuilder builder, int fieldId) {
         switch (fieldId) {
             case FIELD_DOWNLOADS:
-                createDownloadsValues(bundle);
+                createDownloadsValues(builder);
                 break;
             case FIELD_USER_PROFILE:
-                createUserProfileValues(bundle);
+                createUserProfileValues(builder);
                 break;
             case FIELD_TOGGLE_SAMPLE:
-                createToggleValues(bundle);
+                createToggleValues(builder);
                 break;
             case FIELD_MISSED_CALLS_COUNT:
-                createMissedCallCountValues(bundle);
+                createMissedCallCountValues(builder);
                 break;
+            default:
+                mDashClockHomeExtensions.get(fieldId).onUpdateData(builder);
         }
     }
 
-    private void createMissedCallCountValues(Bundle bundle) {
+    private void createMissedCallCountValues(FieldDataBuilder builder) {
         int missedCallCount = getMissedCallsCount();
-        bundle.putCharSequence(HomeServiceContract.DataResponse.EXTRA_TEXT, getString(R.string.calls));
+        builder.text(getString(R.string.calls));
 
         Intent showCallLog = new Intent();
         showCallLog.setAction(Intent.ACTION_VIEW);
@@ -99,17 +117,17 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
 
         PendingIntent pi = PendingIntent.getActivity(this, 1, showCallLog, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        bundle.putParcelable(HomeServiceContract.DataResponse.EXTRA_INTENT, pi);
+        builder.intent(pi);
 
         Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.ic_logo_missed_calls);
-        bundle.putParcelable(HomeServiceContract.DataResponse.EXTRA_LEFT_IMAGE, image);
-        bundle.putInt(HomeServiceContract.DataResponse.EXTRA_COUNT, missedCallCount);
+        builder.leftImage(image);
+        builder.amount("" + missedCallCount);
 
 
     }
 
 
-    private void createUserProfileValues(Bundle bundle) {
+    private void createUserProfileValues(FieldDataBuilder builder) {
         Object[] photoAndName = getUserProfileData();
 
         Bitmap photo = (Bitmap) photoAndName[0];
@@ -117,15 +135,14 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
 
         // we only show the image in Appsi, so we add no intent extra
         // add the photo and name
-        bundle.putParcelable(HomeServiceContract.DataResponse.EXTRA_LARGE_IMAGE, photo);
-        bundle.putString(HomeServiceContract.DataResponse.EXTRA_HEADER, displayName);
-
+        builder.profileStyleImage(photo);
+        builder.header(displayName);
 
         StringBuffer text = new StringBuffer();
         text.append("Android ").append(Build.VERSION.RELEASE).append("\n");
         text.append(Build.MANUFACTURER).append("\n");
         text.append(Build.MODEL);
-        bundle.putString(HomeServiceContract.DataResponse.EXTRA_TEXT, text.toString());
+        builder.text(text.toString());
     }
 
     @Override
@@ -145,40 +162,39 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
         return Service.START_NOT_STICKY;
     }
 
-    private void createToggleValues(Bundle bundle) {
+    private void createToggleValues(FieldDataBuilder builder) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean isEnabled = preferences.getBoolean("sample_toggle", false);
 
-        bundle.putCharSequence(HomeServiceContract.DataResponse.EXTRA_TEXT, getString(R.string.toggle_sample));
+        builder.text(getString(R.string.toggle_sample));
 
         Intent intent = new Intent(this, HomeServiceProvider.class);
         intent.setClass(this, getClass());
         intent.setAction(ACTION_TOGGLE);
 
         PendingIntent pi = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        bundle.putParcelable(HomeServiceContract.DataResponse.EXTRA_INTENT, pi);
+        builder.intent(pi);
 
         Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.ic_logo_toggle);
-        bundle.putParcelable(HomeServiceContract.DataResponse.EXTRA_LEFT_IMAGE, image);
+        builder.leftImage(image);
 
-        bundle.putInt(HomeServiceContract.DataResponse.EXTRA_TOGGLE_COLOR, 0xdddddd);
-        bundle.putInt(HomeServiceContract.DataResponse.EXTRA_TOGGLE_STATUS, isEnabled ? 200 : 40);
+        builder.toggleColor(0xdddddd, isEnabled ? 200 : 40);
     }
 
-    private void createDownloadsValues(Bundle bundle) {
+    private void createDownloadsValues(FieldDataBuilder builder) {
         Intent i = new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS);
-        updateDownloadBundle(bundle, getString(R.string.downloads), R.drawable.ic_plugin_downloads, 12, i);
+        updateDownloadBundle(builder, getString(R.string.downloads), R.drawable.ic_plugin_downloads, 12, i);
     }
 
-    private void updateDownloadBundle(Bundle bundle, String name, int drawable, int count, Intent intent) {
-        bundle.putCharSequence(HomeServiceContract.DataResponse.EXTRA_TEXT, name);
-        bundle.putInt(HomeServiceContract.DataResponse.EXTRA_COUNT, count);
+    private void updateDownloadBundle(FieldDataBuilder builder, String name, int drawable, int count, Intent intent) {
+        builder.text(name);
+        builder.amount("" + count);
 
         PendingIntent pi = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        bundle.putParcelable(HomeServiceContract.DataResponse.EXTRA_INTENT, pi);
+        builder.intent(pi);
 
         Bitmap image = BitmapFactory.decodeResource(getResources(), drawable);
-        bundle.putParcelable(HomeServiceContract.DataResponse.EXTRA_LEFT_IMAGE, image);
+        builder.leftImage(image);
     }
 
     /**
@@ -186,11 +202,16 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
      * here. Simply register your fields.
      */
     @Override
-    protected void onRegisterFields() {
-        registerField(FIELD_DOWNLOADS, HomeServiceContract.FieldsResponse.DISPLAY_TYPE_SIMPLE, getString(R.string.downloads), R.drawable.ic_plugin_downloads);
-        registerField(FIELD_MISSED_CALLS_COUNT, HomeServiceContract.FieldsResponse.DISPLAY_TYPE_MISSED_COUNT, getString(R.string.calls), R.drawable.ic_logo_missed_calls);
-        registerField(FIELD_TOGGLE_SAMPLE, HomeServiceContract.FieldsResponse.DISPLAY_TYPE_TOGGLE_STYLE, getString(R.string.toggle_sample), R.drawable.ic_logo_toggle);
-        registerField(FIELD_USER_PROFILE, HomeServiceContract.FieldsResponse.DISPLAY_PROFILE_IMAGE_STYLE, getString(R.string.profile_image), R.drawable.ic_logo_profile);
+    protected void onRegisterFields(FieldsBuilder builder) {
+        builder.registerField(FIELD_DOWNLOADS, HomeServiceContract.FieldsResponse.DISPLAY_TYPE_SIMPLE, R.string.downloads, R.drawable.ic_plugin_downloads, null);
+        builder.registerField(FIELD_MISSED_CALLS_COUNT, HomeServiceContract.FieldsResponse.DISPLAY_TYPE_MISSED_COUNT, R.string.calls, R.drawable.ic_logo_missed_calls, null, CallLog.CONTENT_URI.toString());
+        builder.registerField(FIELD_TOGGLE_SAMPLE, HomeServiceContract.FieldsResponse.DISPLAY_TYPE_TOGGLE_STYLE, R.string.toggle_sample, R.drawable.ic_logo_toggle, null);
+        builder.registerField(FIELD_USER_PROFILE, HomeServiceContract.FieldsResponse.DISPLAY_PROFILE_IMAGE_STYLE,R.string.profile_image, R.drawable.ic_logo_profile, null);
+        int count = mDashClockHomeExtensions.size();
+        for (int i = 0; i < count; i++) {
+            int key = mDashClockHomeExtensions.keyAt(i);
+            mDashClockHomeExtensions.get(key).onInitialize(builder);
+        }
     }
 
     private int getMissedCallsCount() {
