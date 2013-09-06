@@ -29,5 +29,11 @@
     <string name="network_state_uninitialized">Uninitialized</string>
 
     <string name="no_connections">No connection</string>
+    <string name="conn_eth">Ethernet</string>
+    <string name="conn_bluetooth">Bluetooth</string>
+    <string name="conn_wimax">Wimax</string>
+    <string name="conn_mobile">Mobile</string>
+    <string name="roaming">Roaming</string>
+    <string name="conn_wifi">Wi-Fi</string>
 
 </resources>

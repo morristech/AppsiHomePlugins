@@ -104,6 +104,7 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
      */
     @Override
     protected void updateBundleForField(FieldDataBuilder builder, int fieldId) {
+        Log.i("HomeServiceProvider", "updating field: " + fieldId);
         switch (fieldId) {
             case FIELD_DOWNLOADS:
                 createDownloadsValues(builder);
@@ -259,20 +260,51 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
             NetworkInfo i = conMgr.getActiveNetworkInfo();
 
             boolean isConnected = i.isConnected();
-            boolean isMobile = i.getType() == ConnectivityManager.TYPE_MOBILE;
-            boolean isBluetooth = i.getType() == ConnectivityManager.TYPE_BLUETOOTH;
-            boolean isEthernet = i.getType() == ConnectivityManager.TYPE_ETHERNET;
-            boolean isWimax = i.getType() == ConnectivityManager.TYPE_WIMAX;
 
-            if (isConnected) {
 
+            if (!isConnected) {
+                Bitmap icon = BitmapFactory.decodeResource(getResources(), wifiApEnabled ? R.drawable.ic_plugin_tethering : R.drawable.ic_settings_wireless);
+                builder.header(getString(R.string.no_connections));
+                builder.text("--");
+                return;
             }
 
-            Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_settings_wireless);
-            builder.leftImage(icon);
+            int titleResId = 0;
+            int imageResId = 0;
+            int textResId = 0;
 
-            builder.header(getString(R.string.no_connections));
-            builder.text("--");
+            switch (i.getType()) {
+                case ConnectivityManager.TYPE_ETHERNET:
+                    titleResId = R.string.conn_eth;
+                    imageResId = R.drawable.ic_settings_data;
+                    break;
+                case ConnectivityManager.TYPE_WIFI:
+                    titleResId = R.string.conn_wifi;
+                    imageResId = R.drawable.ic_settings_wireless;
+                    break;
+                case ConnectivityManager.TYPE_MOBILE:
+                    titleResId = R.string.conn_mobile;
+                    imageResId = R.drawable.ic_settings_data;
+                    if (i.isRoaming()) {
+                        textResId = R.string.roaming;
+                    }
+                    break;
+                case ConnectivityManager.TYPE_WIMAX:
+                    titleResId = R.string.conn_wimax;
+                    imageResId = R.drawable.ic_wimax;
+                    break;
+                case ConnectivityManager.TYPE_BLUETOOTH:
+                    titleResId = R.string.conn_bluetooth;
+                    imageResId = R.drawable.ic_settings_bluetooth2;
+                    break;
+            }
+
+            Bitmap icon = imageResId == 0 ? null : BitmapFactory.decodeResource(getResources(), imageResId);
+            builder.leftImage(icon);
+            builder.header(titleResId == 0 ? "--" : getString(titleResId));
+            builder.text(textResId == 0 ? "--" : getString(textResId));
+            return;
+
 
         }
         Bitmap icon = BitmapFactory.decodeResource(getResources(), wifiApEnabled ? R.drawable.ic_plugin_tethering : R.drawable.ic_settings_wireless);
