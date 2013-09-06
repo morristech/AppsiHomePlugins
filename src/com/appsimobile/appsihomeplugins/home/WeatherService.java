@@ -2,7 +2,6 @@ package com.appsimobile.appsihomeplugins.home;
 
 import android.app.AlarmManager;
 import android.app.IntentService;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,10 +15,10 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 
 import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
 import com.appsimobile.appsihomeplugins.R;
@@ -31,8 +30,6 @@ import com.appsimobile.appsihomeplugins.dashclock.weather.WeatherLocationPrefere
 import com.appsimobile.appsihomeplugins.dashclock.weather.WeatherRetryReceiver;
 import com.appsimobile.appsihomeplugins.dashclock.weather.YahooWeatherApiClient;
 import com.appsimobile.appsisupport.home.HomeServiceContract;
-
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -63,7 +60,7 @@ public class WeatherService extends IntentService {
     public static final String STATE_WEATHER_LAST_UPDATE_ELAPSED_MILLIS
             = "state_weather_last_update_elapsed_millis";
 
-    private static final int UPDATE_THROTTLE_MILLIS = 10 * 3600000; // At least 10 min b/w updates
+    private static final long UPDATE_THROTTLE_MILLIS = 10 * DateUtils.MINUTE_IN_MILLIS; // At least 10 min b/w updates
 
     private static final long STALE_LOCATION_MILLIS = 10l * 60000000l; // 10 minutes
 
