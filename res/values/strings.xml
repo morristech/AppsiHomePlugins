@@ -5,4 +5,7 @@
     <string name="calls">Calls</string>
     <string name="toggle_sample">Toggle sample</string>
     <string name="profile_image">Profile image</string>
+    <string name="no_upcoming_appointments">No upcoming appointments</string>
+    <string name="no_alarm_set">No alarm set</string>
+
 </resources>

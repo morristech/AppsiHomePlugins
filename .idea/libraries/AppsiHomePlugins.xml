@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="AppsiHomePlugins">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/AppsiHomePlugins.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

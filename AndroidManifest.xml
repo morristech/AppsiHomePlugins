@@ -5,13 +5,38 @@
     android:versionCode="1"
     android:versionName="1.0">
 
-
     <uses-sdk
         android:targetSdkVersion="18"
         android:minSdkVersion="14" />
 
-    <uses-permission android:name="android.permission.READ_CONTACTS"/>
-    <uses-permission android:name="android.permission.READ_CALL_LOG"/>
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
+    <uses-feature android:name="android.hardware.location" android:required="false" />
+    <uses-feature android:name="android.hardware.location.network" android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen" android:required="true" />
+
+    <!-- Basic permissions -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Weather permissions -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- Gmail permissions -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="com.google.android.gm.permission.READ_CONTENT_PROVIDER" />
+
+    <!-- Calendar permissions -->
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+
+    <!-- Missed calls permissions -->
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+
+    <!-- SMS permissions -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+
+    <!-- Profile image permissions -->
     <uses-permission android:name="android.permission.READ_PROFILE"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
@@ -19,6 +44,7 @@
         android:hardwareAccelerated="true"
         android:label="@string/application_name"
         android:icon="@drawable/ic_plugins"
+        android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
         >
 
         <service android:name=".home.HomeServiceProvider"
@@ -27,7 +53,18 @@
                 <action android:name="com.appsimobile.appsi.APPSI_HOME_PLUGIN" />
             </intent-filter>
         </service>
-        <service android:name=".home.CallLogMonitorService"/>
+        <service
+            android:name=".home.WeatherService"
+            />
+        <activity android:name=".dashclock.weather.WeatherSettingsActivity"
+                  android:exported="true"
+                  android:label="@string/title_weather_settings" />
+        <activity android:name=".dashclock.calendar.CalendarSettingsActivity"
+                  android:exported="true"
+                  android:label="@string/title_calendar_settings" />
+        <activity android:name=".dashclock.gmail.GmailSettingsActivity"
+                  android:exported="true"
+                  android:label="@string/title_gmail_settings" />
 
 
     </application>
