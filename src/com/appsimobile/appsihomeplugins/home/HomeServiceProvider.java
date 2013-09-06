@@ -10,6 +10,8 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiConfiguration;
@@ -165,8 +167,6 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
 
         boolean wifiEnabled = wifiManager.isWifiEnabled();
 
-
-
         try {
             Method method = WifiManager.class.getMethod("isWifiApEnabled");
             wifiApEnabled = (Boolean) method.invoke(wifiManager);
@@ -198,14 +198,7 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
                 Log.e("HomeServiceProvider", "error updating hotspot configuration", e);
 
             }
-        } else if (!wifiEnabled) {
-            Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_settings_wireless);
-            builder.leftImage(icon);
-
-            builder.header(getString(R.string.wifi_disabled));
-            builder.text("--");
-            return;
-        } else {
+        } else if (wifiEnabled) {
 
             SupplicantState supplicantState = wifiInfo.getSupplicantState();
             int connectionStatusResId = 0;
@@ -249,6 +242,7 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
                 case UNINITIALIZED:
                     connectionStatusResId = R.string.network_state_uninitialized;
                     break;
+
             }
             if (R.string.network_state_completed == connectionStatusResId) {
                 int ip = wifiInfo.getIpAddress();
@@ -260,6 +254,26 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
                     builder.text(getString(connectionStatusResId));
                 }
             }
+        } else {
+            ConnectivityManager conMgr =  (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+            NetworkInfo i = conMgr.getActiveNetworkInfo();
+
+            boolean isConnected = i.isConnected();
+            boolean isMobile = i.getType() == ConnectivityManager.TYPE_MOBILE;
+            boolean isBluetooth = i.getType() == ConnectivityManager.TYPE_BLUETOOTH;
+            boolean isEthernet = i.getType() == ConnectivityManager.TYPE_ETHERNET;
+            boolean isWimax = i.getType() == ConnectivityManager.TYPE_WIMAX;
+
+            if (isConnected) {
+
+            }
+
+            Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_settings_wireless);
+            builder.leftImage(icon);
+
+            builder.header(getString(R.string.no_connections));
+            builder.text("--");
+
         }
         Bitmap icon = BitmapFactory.decodeResource(getResources(), wifiApEnabled ? R.drawable.ic_plugin_tethering : R.drawable.ic_settings_wireless);
         builder.leftImage(icon);

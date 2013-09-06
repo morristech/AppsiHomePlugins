@@ -28,6 +28,6 @@
     <string name="network_state_scanning">Scanning</string>
     <string name="network_state_uninitialized">Uninitialized</string>
 
-    <string name="wifi_disabled">Wifi disabled</string>
+    <string name="no_connections">No connection</string>
 
 </resources>
