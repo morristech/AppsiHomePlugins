@@ -16,14 +16,6 @@
 
 package com.appsimobile.appsihomeplugins.dashclock.weather;
 
-import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
-import com.appsimobile.appsihomeplugins.R;
-import com.appsimobile.appsihomeplugins.dashclock.calendar.CalendarSettingsActivity;
-import com.appsimobile.appsihomeplugins.home.WeatherService;
-import com.appsimobile.appsisupport.home.FieldDataBuilder;
-import com.appsimobile.appsisupport.home.FieldsBuilder;
-import com.appsimobile.appsisupport.home.HomeServiceContract;
-
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -33,6 +25,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
+import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
+import com.appsimobile.appsihomeplugins.R;
+import com.appsimobile.appsihomeplugins.home.WeatherService;
+import com.appsimobile.appsisupport.home.FieldDataBuilder;
+import com.appsimobile.appsisupport.home.FieldsBuilder;
+import com.appsimobile.appsisupport.home.HomeServiceContract;
 
 import java.net.URISyntaxException;
 

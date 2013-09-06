@@ -17,9 +17,7 @@
 package com.appsimobile.appsihomeplugins.dashclock.weather;
 
 import android.location.Location;
-import android.os.Debug;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 
 import com.appsimobile.appsihomeplugins.R;

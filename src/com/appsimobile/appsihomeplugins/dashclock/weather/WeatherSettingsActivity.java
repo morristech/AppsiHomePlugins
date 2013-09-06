@@ -16,15 +16,15 @@
 
 package com.appsimobile.appsihomeplugins.dashclock.weather;
 
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+
 import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
 import com.appsimobile.appsihomeplugins.R;
 import com.appsimobile.appsihomeplugins.dashclock.configuration.BaseSettingsActivity;
 import com.appsimobile.appsihomeplugins.home.WeatherService;
 import com.appsimobile.appsisupport.home.HomeServiceContract;
-
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
 
 public class WeatherSettingsActivity extends BaseSettingsActivity {
     @Override

@@ -16,27 +16,11 @@
 
 package com.appsimobile.appsihomeplugins.dashclock;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Build;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.appsimobile.appsihomeplugins.BuildConfig;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * Helper methods that make logging more consistent throughout the app.

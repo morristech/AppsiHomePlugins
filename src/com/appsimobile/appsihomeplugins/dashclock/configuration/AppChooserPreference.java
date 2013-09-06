@@ -16,9 +16,6 @@
 
 package com.appsimobile.appsihomeplugins.dashclock.configuration;
 
-import com.appsimobile.appsihomeplugins.R;
-import com.appsimobile.appsihomeplugins.dashclock.ui.SimplePagedTabsHelper;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -45,6 +42,9 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.appsimobile.appsihomeplugins.R;
+import com.appsimobile.appsihomeplugins.dashclock.ui.SimplePagedTabsHelper;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;

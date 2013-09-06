@@ -16,13 +16,6 @@
 
 package com.appsimobile.appsihomeplugins.dashclock.calendar;
 
-import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
-import com.appsimobile.appsihomeplugins.R;
-import com.appsimobile.appsihomeplugins.dashclock.LogUtils;
-import com.appsimobile.appsisupport.home.FieldDataBuilder;
-import com.appsimobile.appsisupport.home.FieldsBuilder;
-import com.appsimobile.appsisupport.home.HomeServiceContract;
-
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -37,6 +30,13 @@ import android.provider.CalendarContract;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Pair;
+
+import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
+import com.appsimobile.appsihomeplugins.R;
+import com.appsimobile.appsihomeplugins.dashclock.LogUtils;
+import com.appsimobile.appsisupport.home.FieldDataBuilder;
+import com.appsimobile.appsisupport.home.FieldsBuilder;
+import com.appsimobile.appsisupport.home.HomeServiceContract;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

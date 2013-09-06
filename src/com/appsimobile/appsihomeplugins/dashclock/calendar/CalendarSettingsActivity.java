@@ -16,15 +16,15 @@
 
 package com.appsimobile.appsihomeplugins.dashclock.calendar;
 
-import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
-import com.appsimobile.appsihomeplugins.R;
-import com.appsimobile.appsihomeplugins.dashclock.configuration.BaseSettingsActivity;
-import com.appsimobile.appsisupport.home.HomeServiceContract;
-
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.util.Pair;
+
+import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
+import com.appsimobile.appsihomeplugins.R;
+import com.appsimobile.appsihomeplugins.dashclock.configuration.BaseSettingsActivity;
+import com.appsimobile.appsisupport.home.HomeServiceContract;
 
 import java.util.HashSet;
 import java.util.List;

@@ -16,14 +16,6 @@
 
 package com.appsimobile.appsihomeplugins.dashclock.nextalarm;
 
-import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
-import com.appsimobile.appsihomeplugins.R;
-import com.appsimobile.appsihomeplugins.dashclock.LogUtils;
-import com.appsimobile.appsihomeplugins.dashclock.Utils;
-import com.appsimobile.appsisupport.home.FieldDataBuilder;
-import com.appsimobile.appsisupport.home.FieldsBuilder;
-import com.appsimobile.appsisupport.home.HomeServiceContract;
-
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +23,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.provider.Settings;
 import android.text.TextUtils;
+
+import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
+import com.appsimobile.appsihomeplugins.R;
+import com.appsimobile.appsihomeplugins.dashclock.LogUtils;
+import com.appsimobile.appsihomeplugins.dashclock.Utils;
+import com.appsimobile.appsisupport.home.FieldDataBuilder;
+import com.appsimobile.appsisupport.home.FieldsBuilder;
+import com.appsimobile.appsisupport.home.HomeServiceContract;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

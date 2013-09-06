@@ -16,14 +16,6 @@
 
 package com.appsimobile.appsihomeplugins.dashclock.gmail;
 
-import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
-import com.appsimobile.appsihomeplugins.R;
-import com.appsimobile.appsihomeplugins.dashclock.LogUtils;
-import com.appsimobile.appsihomeplugins.dashclock.calendar.CalendarSettingsActivity;
-import com.appsimobile.appsisupport.home.FieldDataBuilder;
-import com.appsimobile.appsisupport.home.FieldsBuilder;
-import com.appsimobile.appsisupport.home.HomeServiceContract;
-
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.PendingIntent;
@@ -38,6 +30,13 @@ import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Pair;
+
+import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
+import com.appsimobile.appsihomeplugins.R;
+import com.appsimobile.appsihomeplugins.dashclock.LogUtils;
+import com.appsimobile.appsisupport.home.FieldDataBuilder;
+import com.appsimobile.appsisupport.home.FieldsBuilder;
+import com.appsimobile.appsisupport.home.HomeServiceContract;
 
 import java.util.ArrayList;
 import java.util.Arrays;

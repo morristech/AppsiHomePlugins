@@ -18,7 +18,6 @@ package com.appsimobile.appsihomeplugins.dashclock.render;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
