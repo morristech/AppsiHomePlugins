@@ -3,18 +3,26 @@ package com.appsimobile.appsihomeplugins.home;
 import android.app.DownloadManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -31,8 +39,11 @@ import com.appsimobile.appsisupport.home.FieldDataBuilder;
 import com.appsimobile.appsisupport.home.FieldsBuilder;
 import com.appsimobile.appsisupport.home.HomeServiceContract;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.util.Scanner;
 
 /**
  * Created by nick on 8/9/13.
@@ -62,6 +73,11 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
      * the call log is updated.
      */
     public static final int FIELD_MISSED_CALLS_COUNT = 4;
+
+    /**
+     * Show a tethering info field
+     */
+    public static final int FIELD_TETHERING_INFO = 5;
 
     public static final String ACTION_TOGGLE = "com.appsimobile.appsihomeplugins.home.ACTION_TOGGLE";
 
@@ -101,6 +117,9 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
             case FIELD_MISSED_CALLS_COUNT:
                 createMissedCallCountValues(builder);
                 break;
+            case FIELD_TETHERING_INFO:
+                createTetheringFields(builder);
+                break;
             default:
                 mDashClockHomeExtensions.get(fieldId).onUpdateData(builder);
         }
@@ -122,6 +141,131 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
         Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.ic_logo_missed_calls);
         builder.leftImage(image);
         builder.amount("" + missedCallCount);
+
+
+    }
+
+
+    private void createTetheringFields(FieldDataBuilder builder) {
+        ComponentName comp = new ComponentName("com.android.settings", "com.android.settings.TetherSettings");
+
+        Intent intent = new Intent();
+        intent.setComponent(comp);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, FIELD_TETHERING_INFO, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+
+        builder.intent(pendingIntent);
+
+        WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
+
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        String ssid = wifiInfo.getSSID();
+
+        builder.header(ssid);
+
+        boolean wifiApEnabled = false;
+
+        boolean wifiEnabled = wifiManager.isWifiEnabled();
+
+
+
+        try {
+            Method method = WifiManager.class.getMethod("isWifiApEnabled");
+            wifiApEnabled = (Boolean) method.invoke(wifiManager);
+        } catch (Exception e) {
+            Log.e("HomeServiceProvider", "error getting AP state", e);
+        }
+        if (wifiApEnabled) {
+            try {
+                Scanner connectionsScanner = new Scanner(new File("/proc/net/arp"));
+
+                Integer connectionsCount = 0;
+                while (connectionsScanner.hasNextLine()) {
+                    connectionsScanner.nextLine();
+                    connectionsCount++;
+                }
+                // remove header line
+                connectionsCount = connectionsCount - 1;
+
+                String text = getResources().getQuantityString(R.plurals.connection_count, connectionsCount, connectionsCount);
+                builder.text(text);
+
+                Method getWifiApConfiguration = WifiManager.class.getDeclaredMethod("getWifiApConfiguration");
+                builder.header(((WifiConfiguration) getWifiApConfiguration.invoke(wifiManager)).SSID);
+
+                connectionsScanner.close();
+            } catch (IOException e) {
+                Log.e("HomeServiceProvider", "error reading from /proc/net/arp", e);
+            } catch (Exception e) {
+                Log.e("HomeServiceProvider", "error updating hotspot configuration", e);
+
+            }
+        } else if (!wifiEnabled) {
+            Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_settings_wireless);
+            builder.leftImage(icon);
+
+            builder.header(getString(R.string.wifi_disabled));
+            builder.text("--");
+            return;
+        } else {
+
+            SupplicantState supplicantState = wifiInfo.getSupplicantState();
+            int connectionStatusResId = 0;
+            switch (supplicantState) {
+                case ASSOCIATED:
+                    connectionStatusResId = R.string.network_state_associated;
+                    break;
+                case ASSOCIATING:
+                    connectionStatusResId = R.string.network_state_associating;
+                    break;
+                case AUTHENTICATING:
+                    connectionStatusResId = R.string.network_state_authenticating;
+                    break;
+                case COMPLETED:
+                    connectionStatusResId = R.string.network_state_completed;
+                    break;
+                case DISCONNECTED:
+                    connectionStatusResId = R.string.network_state_disconnected;
+                    break;
+                case DORMANT:
+                    connectionStatusResId = R.string.network_state_doramnt;
+                    break;
+                case FOUR_WAY_HANDSHAKE:
+                    connectionStatusResId = R.string.network_state_fwh;
+                    break;
+                case GROUP_HANDSHAKE:
+                    connectionStatusResId = R.string.network_state_gh;
+                    break;
+                case INACTIVE:
+                    connectionStatusResId = R.string.network_state_inactive;
+                    break;
+                case INTERFACE_DISABLED:
+                    connectionStatusResId = R.string.network_state_interface_disabled;
+                    break;
+                case INVALID:
+                    connectionStatusResId = R.string.network_state_invalid;
+                    break;
+                case SCANNING:
+                    connectionStatusResId = R.string.network_state_scanning;
+                    break;
+                case UNINITIALIZED:
+                    connectionStatusResId = R.string.network_state_uninitialized;
+                    break;
+            }
+            if (R.string.network_state_completed == connectionStatusResId) {
+                int ip = wifiInfo.getIpAddress();
+                String ipAddress = Formatter.formatIpAddress(ip);
+
+                builder.text(ipAddress);
+            } else {
+                if (connectionStatusResId != 0) {
+                    builder.text(getString(connectionStatusResId));
+                }
+            }
+        }
+        Bitmap icon = BitmapFactory.decodeResource(getResources(), wifiApEnabled ? R.drawable.ic_plugin_tethering : R.drawable.ic_settings_wireless);
+        builder.leftImage(icon);
+
 
 
     }
@@ -205,8 +349,9 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
     protected void onRegisterFields(FieldsBuilder builder) {
         builder.registerField(FIELD_DOWNLOADS, HomeServiceContract.FieldsResponse.DISPLAY_TYPE_SIMPLE, R.string.downloads, R.drawable.ic_plugin_downloads, null);
         builder.registerField(FIELD_MISSED_CALLS_COUNT, HomeServiceContract.FieldsResponse.DISPLAY_TYPE_MISSED_COUNT, R.string.calls, R.drawable.ic_logo_missed_calls, null, CallLog.CONTENT_URI.toString());
-        builder.registerField(FIELD_TOGGLE_SAMPLE, HomeServiceContract.FieldsResponse.DISPLAY_TYPE_TOGGLE_STYLE, R.string.toggle_sample, R.drawable.ic_logo_toggle, null);
+        //builder.registerField(FIELD_TOGGLE_SAMPLE, HomeServiceContract.FieldsResponse.DISPLAY_TYPE_TOGGLE_STYLE, R.string.toggle_sample, R.drawable.ic_logo_toggle, null);
         builder.registerField(FIELD_USER_PROFILE, HomeServiceContract.FieldsResponse.DISPLAY_PROFILE_IMAGE_STYLE,R.string.profile_image, R.drawable.ic_logo_profile, null);
+        builder.registerField(FIELD_TETHERING_INFO, HomeServiceContract.FieldsResponse.DISPLAY_TYPE_DASHCLOCK,R.string.wifi_info, R.drawable.ic_plugin_tethering, null);
         int count = mDashClockHomeExtensions.size();
         for (int i = 0; i < count; i++) {
             int key = mDashClockHomeExtensions.keyAt(i);

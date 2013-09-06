@@ -5,7 +5,29 @@
     <string name="calls">Calls</string>
     <string name="toggle_sample">Toggle sample</string>
     <string name="profile_image">Profile image</string>
+    <string name="wifi_info">Wifi info</string>
     <string name="no_upcoming_appointments">No upcoming appointments</string>
     <string name="no_alarm_set">No alarm set</string>
+
+    <plurals name="connection_count">
+        <item quantity="other">%d connections</item>
+        <item quantity="one">%d connection</item>
+    </plurals>
+
+    <string name="network_state_associated">Associated with hotspot</string>
+    <string name="network_state_associating">Associating with hotspot</string>
+    <string name="network_state_authenticating">Authenticating</string>
+    <string name="network_state_completed">Completed</string>
+    <string name="network_state_disconnected">Disconnected</string>
+    <string name="network_state_doramnt">Hotspot forced disconnect</string>
+    <string name="network_state_fwh">Handshaking</string>
+    <string name="network_state_gh">Handshaking</string>
+    <string name="network_state_inactive">Inactive</string>
+    <string name="network_state_interface_disabled">Disabled</string>
+    <string name="network_state_invalid">Error</string>
+    <string name="network_state_scanning">Scanning</string>
+    <string name="network_state_uninitialized">Uninitialized</string>
+
+    <string name="wifi_disabled">Wifi disabled</string>
 
 </resources>

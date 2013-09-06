@@ -55,6 +55,7 @@ public class WeatherService extends IntentService {
     public static final Intent DEFAULT_WEATHER_INTENT = new Intent(Intent.ACTION_VIEW,
             Uri.parse("https://www.google.com/search?q=weather"));
 
+    public static final String STATE_UPDATE_IN_PROGRESS = "state_update_in_progress";
     public static final String STATE_WEATHER_LAST_BACKOFF_MILLIS
             = "state_weather_last_backoff_millis";
     public static final String STATE_WEATHER_LAST_UPDATE_ELAPSED_MILLIS
@@ -89,8 +90,19 @@ public class WeatherService extends IntentService {
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        sp.edit().putBoolean(STATE_UPDATE_IN_PROGRESS, false).apply();
+    }
+
+    @Override
     protected void onHandleIntent(Intent intent) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean updateInProgress = sp.getBoolean(STATE_UPDATE_IN_PROGRESS, false);
+
+        if (updateInProgress) return;
+
         sWeatherIntent = AppChooserPreference.getIntentValue(
                 sp.getString(PREF_WEATHER_SHORTCUT, null), DEFAULT_WEATHER_INTENT);
 
@@ -98,17 +110,22 @@ public class WeatherService extends IntentService {
         long nowElapsedMillis = SystemClock.elapsedRealtime();
 
         if (nowElapsedMillis > lastUpdateElapsedMillis + UPDATE_THROTTLE_MILLIS) {
+            AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            am.cancel(WeatherRetryReceiver.getPendingIntent(this));
+            sp.edit().putBoolean(STATE_UPDATE_IN_PROGRESS, true).apply();
             updateWeatherData(sp);
+        } else {
+            stopSelf();
         }
-
     }
 
 
     private void resetAndCancelRetries() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        sp.edit().remove(STATE_WEATHER_LAST_BACKOFF_MILLIS).apply();
+        sp.edit().remove(STATE_WEATHER_LAST_BACKOFF_MILLIS).remove(STATE_UPDATE_IN_PROGRESS).apply();
         AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         am.cancel(WeatherRetryReceiver.getPendingIntent(this));
+        stopSelf();
     }
 
     private void scheduleRetry() {

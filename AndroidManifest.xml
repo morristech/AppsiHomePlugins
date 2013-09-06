@@ -40,6 +40,9 @@
     <uses-permission android:name="android.permission.READ_PROFILE"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
+    <!-- Tethering permissions -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
     <application
         android:hardwareAccelerated="true"
         android:label="@string/application_name"
@@ -66,6 +69,11 @@
                   android:exported="true"
                   android:label="@string/title_gmail_settings" />
 
-
+        <receiver android:name=".NetworkStateBroadcastReceiver">
+            <intent-filter>
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED"/>
+                <action android:name="android.net.wifi.STATE_CHANGE"/>
+            </intent-filter>
+        </receiver>
     </application>
 </manifest> 
