@@ -22,8 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.provider.CalendarContract;
@@ -34,9 +32,9 @@ import android.util.Pair;
 import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
 import com.appsimobile.appsihomeplugins.R;
 import com.appsimobile.appsihomeplugins.dashclock.LogUtils;
-import com.appsimobile.appsisupport.home.FieldDataBuilder;
 import com.appsimobile.appsisupport.home.FieldsBuilder;
 import com.appsimobile.appsisupport.home.HomeServiceContract;
+import com.appsimobile.appsisupport.internal.FieldValues;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -148,7 +146,7 @@ public class CalendarExtension extends DashClockHomeExtension {
     }
 
     @Override
-    public void onUpdateData(FieldDataBuilder dataBuilder) {
+    public void onUpdateData(FieldValues.Builder dataBuilder) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
         boolean showAllDay = sp.getBoolean(PREF_SHOW_ALL_DAY, false);
 
@@ -226,8 +224,7 @@ public class CalendarExtension extends DashClockHomeExtension {
 
         if (cursor.isAfterLast()) {
             LOGD(TAG, "No upcoming appointments found.");
-            Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.ic_extension_calendar);
-            dataBuilder.leftImage(image).
+            dataBuilder.leftImageResId(R.drawable.ic_extension_calendar).
                     header(getString(R.string.no_upcoming_appointments));
 
             cursor.close();
@@ -322,8 +319,7 @@ public class CalendarExtension extends DashClockHomeExtension {
 
         PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), DashClockHomeExtension.DASHCLOCK_EXTENSION_CALENDAR, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.ic_extension_calendar);
-        dataBuilder.leftImage(image).
+        dataBuilder.leftImageResId(R.drawable.ic_extension_calendar).
                 header(eventTitle).
                 text(expandedBody).
                 intent(pendingIntent);

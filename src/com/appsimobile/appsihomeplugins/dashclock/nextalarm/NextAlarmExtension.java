@@ -19,8 +19,6 @@ package com.appsimobile.appsihomeplugins.dashclock.nextalarm;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.provider.Settings;
 import android.text.TextUtils;
 
@@ -28,9 +26,9 @@ import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
 import com.appsimobile.appsihomeplugins.R;
 import com.appsimobile.appsihomeplugins.dashclock.LogUtils;
 import com.appsimobile.appsihomeplugins.dashclock.Utils;
-import com.appsimobile.appsisupport.home.FieldDataBuilder;
 import com.appsimobile.appsisupport.home.FieldsBuilder;
 import com.appsimobile.appsisupport.home.HomeServiceContract;
+import com.appsimobile.appsisupport.internal.FieldValues;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,7 +64,7 @@ public class NextAlarmExtension extends DashClockHomeExtension {
     }
 
     @Override
-    public void onUpdateData(FieldDataBuilder builder) {
+    public void onUpdateData(FieldValues.Builder builder) {
         String nextAlarm = Settings.System.getString(getContentResolver(),
                 Settings.System.NEXT_ALARM_FORMATTED);
         if (!TextUtils.isEmpty(nextAlarm)) {
@@ -80,10 +78,9 @@ public class NextAlarmExtension extends DashClockHomeExtension {
         }
         Intent intent = Utils.getDefaultAlarmsIntent(getContext());
         PendingIntent pendingIntent = intent == null ? null : PendingIntent.getActivity(getContext(), DashClockHomeExtension.DASHCLOCK_EXTENSION_NEXT_ALARM, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_extension_next_alarm);
 
         builder.intent(pendingIntent)
-                .leftImage(bitmap)
+                .leftImageResId(R.drawable.ic_extension_next_alarm)
                 .text(nextAlarm);
 
 

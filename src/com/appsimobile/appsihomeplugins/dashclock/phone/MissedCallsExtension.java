@@ -20,17 +20,15 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.provider.CallLog;
 import android.text.TextUtils;
 
 import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
 import com.appsimobile.appsihomeplugins.R;
 import com.appsimobile.appsihomeplugins.dashclock.LogUtils;
-import com.appsimobile.appsisupport.home.FieldDataBuilder;
 import com.appsimobile.appsisupport.home.FieldsBuilder;
 import com.appsimobile.appsisupport.home.HomeServiceContract;
+import com.appsimobile.appsisupport.internal.FieldValues;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -69,7 +67,7 @@ public class MissedCallsExtension extends DashClockHomeExtension {
     }
 
     @Override
-    public void onUpdateData(FieldDataBuilder builder) {
+    public void onUpdateData(FieldValues.Builder builder) {
         Cursor cursor = tryOpenMissedCallsCursor();
         if (cursor == null) {
             LOGE(TAG, "Null missed calls cursor, short-circuiting.");
@@ -99,10 +97,9 @@ public class MissedCallsExtension extends DashClockHomeExtension {
 
         Intent clickIntent = new Intent(Intent.ACTION_VIEW, CallLog.Calls.CONTENT_URI);
         PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), DashClockHomeExtension.DASHCLOCK_EXTENSION_MISSED_CALLS, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.ic_extension_missed_calls);
 
         builder.intent(pendingIntent)
-                .leftImage(image)
+                .leftImageResId(R.drawable.ic_extension_missed_calls)
                 .header(getResources().getQuantityString(
                         R.plurals.missed_calls_title_template, missedCalls, missedCalls));
         if (missedCalls > 0) {

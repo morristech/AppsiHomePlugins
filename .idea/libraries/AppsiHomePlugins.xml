@@ -4,6 +4,9 @@
       <root url="jar://$PROJECT_DIR$/lib/AppsiHomePlugins.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="file://$USER_HOME$/AndroidStudioProjects/AppsiSupport/gen" />
+      <root url="file://$USER_HOME$/AndroidStudioProjects/AppsiSupport/src" />
+    </SOURCES>
   </library>
 </component>

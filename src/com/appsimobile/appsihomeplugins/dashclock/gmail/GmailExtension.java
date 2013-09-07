@@ -24,8 +24,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
@@ -34,9 +32,9 @@ import android.util.Pair;
 import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
 import com.appsimobile.appsihomeplugins.R;
 import com.appsimobile.appsihomeplugins.dashclock.LogUtils;
-import com.appsimobile.appsisupport.home.FieldDataBuilder;
 import com.appsimobile.appsisupport.home.FieldsBuilder;
 import com.appsimobile.appsisupport.home.HomeServiceContract;
+import com.appsimobile.appsisupport.internal.FieldValues;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -106,7 +104,7 @@ public class GmailExtension extends DashClockHomeExtension {
     }
 
     @Override
-    public void onUpdateData(FieldDataBuilder builder) {
+    public void onUpdateData(FieldValues.Builder builder) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
         String labelCanonical = sp.getString(PREF_LABEL, "i");
         Set<String> selectedAccounts = getSelectedAccounts();
@@ -191,12 +189,11 @@ public class GmailExtension extends DashClockHomeExtension {
                     .addCategory(Intent.CATEGORY_LAUNCHER);
         }
 
-        Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.ic_extension_gmail);
         PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), DashClockHomeExtension.DASHCLOCK_EXTENSION_GMAIL, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         builder.header(getResources().getQuantityString(
                     R.plurals.gmail_title_template, unread, unread))
-                .leftImage(image)
+                .leftImageResId(R.drawable.ic_extension_gmail)
                 .text(body.toString())
                 .intent(pendingIntent);
 

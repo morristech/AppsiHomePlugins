@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 
-import com.appsimobile.appsisupport.home.FieldDataBuilder;
 import com.appsimobile.appsisupport.home.FieldsBuilder;
+import com.appsimobile.appsisupport.internal.FieldValues;
 
 /**
  * Created by nnma on 9/5/13.
@@ -53,6 +53,6 @@ public abstract class DashClockHomeExtension {
         return mContext.getPackageManager();
     }
 
-    public abstract void onUpdateData(FieldDataBuilder builder);
+    public abstract void onUpdateData(FieldValues.Builder builder);
     public abstract void onInitialize(FieldsBuilder builder);
 }

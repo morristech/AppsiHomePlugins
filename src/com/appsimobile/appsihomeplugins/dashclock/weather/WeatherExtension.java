@@ -21,17 +21,15 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
 import com.appsimobile.appsihomeplugins.R;
 import com.appsimobile.appsihomeplugins.home.WeatherService;
-import com.appsimobile.appsisupport.home.FieldDataBuilder;
 import com.appsimobile.appsisupport.home.FieldsBuilder;
 import com.appsimobile.appsisupport.home.HomeServiceContract;
+import com.appsimobile.appsisupport.internal.FieldValues;
 
 import java.net.URISyntaxException;
 
@@ -58,7 +56,7 @@ public class WeatherExtension extends DashClockHomeExtension {
     }
 
     @Override
-    public void onUpdateData(FieldDataBuilder builder) {
+    public void onUpdateData(FieldValues.Builder builder) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getContext());
         sWeatherUnits = sp.getString(WeatherService.PREF_WEATHER_UNITS, sWeatherUnits);
 
@@ -80,10 +78,9 @@ public class WeatherExtension extends DashClockHomeExtension {
             Log.w("WeatherExtension", "error parsing uri", e);
         }
 
-        Bitmap image = icon == 0 ? null : BitmapFactory.decodeResource(getResources(), icon);
         PendingIntent pendingIntent = intent == null ? null : PendingIntent.getActivity(getContext(), DashClockHomeExtension.DASHCLOCK_EXTENSION_WEATHER, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        builder.leftImage(image)
+        builder.leftImageResId(icon)
                 .intent(pendingIntent)
                 .header(header)
                 .text(text);

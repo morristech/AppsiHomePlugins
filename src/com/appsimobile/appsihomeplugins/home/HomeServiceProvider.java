@@ -35,9 +35,9 @@ import com.appsimobile.appsihomeplugins.dashclock.phone.MissedCallsExtension;
 import com.appsimobile.appsihomeplugins.dashclock.phone.SmsExtension;
 import com.appsimobile.appsihomeplugins.dashclock.weather.WeatherExtension;
 import com.appsimobile.appsisupport.home.AppsiHomeServiceProvider;
-import com.appsimobile.appsisupport.home.FieldDataBuilder;
 import com.appsimobile.appsisupport.home.FieldsBuilder;
 import com.appsimobile.appsisupport.home.HomeServiceContract;
+import com.appsimobile.appsisupport.internal.FieldValues;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,7 +85,9 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
 
     @Override
     public void onCreate() {
-        // call before super.onCreate, otherwise the field will not be known
+        Log.d("HomeServiceProvider", "oncreate");
+        super.onCreate();
+
         mDashClockHomeExtensions.put(DashClockHomeExtension.DASHCLOCK_EXTENSION_CALENDAR, new CalendarExtension(this));
         mDashClockHomeExtensions.put(DashClockHomeExtension.DASHCLOCK_EXTENSION_GMAIL, new GmailExtension(this));
         mDashClockHomeExtensions.put(DashClockHomeExtension.DASHCLOCK_EXTENSION_NEXT_ALARM, new NextAlarmExtension(this));
@@ -93,8 +95,8 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
         mDashClockHomeExtensions.put(DashClockHomeExtension.DASHCLOCK_EXTENSION_SMS, new SmsExtension(this));
         mDashClockHomeExtensions.put(DashClockHomeExtension.DASHCLOCK_EXTENSION_WEATHER, new WeatherExtension(this));
         mHandler = new Handler();
-        super.onCreate();
     }
+
 
     /**
      * This is called when Appsi needs to update a specific field. Fill the
@@ -103,7 +105,7 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
      * @param fieldId
      */
     @Override
-    protected void updateBundleForField(FieldDataBuilder builder, int fieldId) {
+    protected void updateBundleForField(FieldValues.Builder builder, int fieldId, int reason) {
         Log.i("HomeServiceProvider", "updating field: " + fieldId);
         switch (fieldId) {
             case FIELD_DOWNLOADS:
@@ -126,7 +128,7 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
         }
     }
 
-    private void createMissedCallCountValues(FieldDataBuilder builder) {
+    private void createMissedCallCountValues(FieldValues.Builder builder) {
         int missedCallCount = getMissedCallsCount();
         builder.text(getString(R.string.calls));
 
@@ -139,15 +141,14 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
 
         builder.intent(pi);
 
-        Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.ic_logo_missed_calls);
-        builder.leftImage(image);
+        builder.leftImageResId(R.drawable.ic_logo_missed_calls);
         builder.amount("" + missedCallCount);
 
 
     }
 
 
-    private void createTetheringFields(FieldDataBuilder builder) {
+    private void createTetheringFields(FieldValues.Builder builder) {
         ComponentName comp = new ComponentName("com.android.settings", "com.android.settings.TetherSettings");
 
         Intent intent = new Intent();
@@ -299,23 +300,22 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
                     break;
             }
 
-            Bitmap icon = imageResId == 0 ? null : BitmapFactory.decodeResource(getResources(), imageResId);
-            builder.leftImage(icon);
+            builder.leftImageResId(imageResId);
             builder.header(titleResId == 0 ? "--" : getString(titleResId));
             builder.text(textResId == 0 ? "--" : getString(textResId));
             return;
 
 
         }
-        Bitmap icon = BitmapFactory.decodeResource(getResources(), wifiApEnabled ? R.drawable.ic_plugin_tethering : R.drawable.ic_settings_wireless);
-        builder.leftImage(icon);
+        int icon = wifiApEnabled ? R.drawable.ic_plugin_tethering : R.drawable.ic_settings_wireless;
+        builder.leftImageResId(icon);
 
 
 
     }
 
 
-    private void createUserProfileValues(FieldDataBuilder builder) {
+    private void createUserProfileValues(FieldValues.Builder builder) {
         Object[] photoAndName = getUserProfileData();
 
         Bitmap photo = (Bitmap) photoAndName[0];
@@ -323,7 +323,7 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
 
         // we only show the image in Appsi, so we add no intent extra
         // add the photo and name
-        builder.profileStyleImage(photo);
+        builder.largeImage(photo);
         builder.header(displayName);
 
         StringBuffer text = new StringBuffer();
@@ -350,7 +350,7 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
         return Service.START_NOT_STICKY;
     }
 
-    private void createToggleValues(FieldDataBuilder builder) {
+    private void createToggleValues(FieldValues.Builder builder) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         boolean isEnabled = preferences.getBoolean("sample_toggle", false);
 
@@ -363,26 +363,22 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
         PendingIntent pi = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.intent(pi);
 
-        Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.ic_logo_toggle);
-        builder.leftImage(image);
+        builder.leftImageResId(R.drawable.ic_logo_toggle);
 
-        builder.toggleColor(0xdddddd, isEnabled ? 200 : 40);
+        builder.toggle(isEnabled ? 200 : 40, 0xdddddd);
     }
 
-    private void createDownloadsValues(FieldDataBuilder builder) {
+    private void createDownloadsValues(FieldValues.Builder builder) {
         Intent i = new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS);
         updateDownloadBundle(builder, getString(R.string.downloads), R.drawable.ic_plugin_downloads, 12, i);
     }
 
-    private void updateDownloadBundle(FieldDataBuilder builder, String name, int drawable, int count, Intent intent) {
-        builder.text(name);
-        builder.amount("" + count);
-
+    private void updateDownloadBundle(FieldValues.Builder builder, String name, int drawable, int count, Intent intent) {
         PendingIntent pi = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.intent(pi);
-
-        Bitmap image = BitmapFactory.decodeResource(getResources(), drawable);
-        builder.leftImage(image);
+        builder.text(name)
+                .amount("" + count)
+                .intent(pi)
+                .leftImageResId(drawable);
     }
 
     /**
@@ -391,6 +387,7 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
      */
     @Override
     protected void onRegisterFields(FieldsBuilder builder) {
+        Log.d("HomeServiceProvider", "register fields");
         builder.registerField(FIELD_DOWNLOADS, HomeServiceContract.FieldsResponse.DISPLAY_TYPE_SIMPLE, R.string.downloads, R.drawable.ic_plugin_downloads, null);
         builder.registerField(FIELD_MISSED_CALLS_COUNT, HomeServiceContract.FieldsResponse.DISPLAY_TYPE_MISSED_COUNT, R.string.calls, R.drawable.ic_logo_missed_calls, null, CallLog.CONTENT_URI.toString());
         //builder.registerField(FIELD_TOGGLE_SAMPLE, HomeServiceContract.FieldsResponse.DISPLAY_TYPE_TOGGLE_STYLE, R.string.toggle_sample, R.drawable.ic_logo_toggle, null);

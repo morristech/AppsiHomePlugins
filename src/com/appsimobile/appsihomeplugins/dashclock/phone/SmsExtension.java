@@ -20,18 +20,17 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.ContactsContract;
+import android.support.v4.content.IntentCompat;
 import android.text.TextUtils;
 
 import com.appsimobile.appsihomeplugins.DashClockHomeExtension;
 import com.appsimobile.appsihomeplugins.R;
 import com.appsimobile.appsihomeplugins.dashclock.LogUtils;
-import com.appsimobile.appsisupport.home.FieldDataBuilder;
 import com.appsimobile.appsisupport.home.FieldsBuilder;
 import com.appsimobile.appsisupport.home.HomeServiceContract;
+import com.appsimobile.appsisupport.internal.FieldValues;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -71,7 +70,7 @@ public class SmsExtension extends DashClockHomeExtension {
     }
 
     @Override
-    public void onUpdateData(FieldDataBuilder builder) {
+    public void onUpdateData(FieldValues.Builder builder) {
         long lastUnreadThreadId = 0;
         Set<Long> unreadThreadIds = new HashSet<Long>();
         Set<String> unreadThreadParticipantNames = new HashSet<String>();
@@ -173,14 +172,13 @@ public class SmsExtension extends DashClockHomeExtension {
                     TelephonyProviderConstants.MmsSms.CONTENT_CONVERSATIONS_URI.buildUpon()
                             .appendPath(Long.toString(lastUnreadThreadId)).build());
         } else {
-            clickIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
+            clickIntent = IntentCompat.makeMainSelectorActivity(Intent.ACTION_MAIN,
                     Intent.CATEGORY_APP_MESSAGING);
         }
 
-        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_extension_sms);
         PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), DashClockHomeExtension.DASHCLOCK_EXTENSION_SMS, clickIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        builder.leftImage(icon)
+        builder.leftImageResId(R.drawable.ic_extension_sms)
                 .intent(pendingIntent)
                 .header(getResources().getQuantityString(
                         R.plurals.sms_title_template, unreadConversations,
@@ -414,4 +412,6 @@ public class SmsExtension extends DashClockHomeExtension {
 
         int DISPLAY_NAME = 0;
     }
+
+
 }
