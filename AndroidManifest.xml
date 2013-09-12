@@ -46,7 +46,7 @@
     <application
         android:hardwareAccelerated="true"
         android:label="@string/application_name"
-        android:icon="@drawable/ic_plugins"
+        android:icon="@drawable/app_logo"
         android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
         >
 
@@ -73,6 +73,7 @@
             <intent-filter>
                 <action android:name="android.net.wifi.WIFI_STATE_CHANGED"/>
                 <action android:name="android.net.wifi.STATE_CHANGE"/>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
             </intent-filter>
         </receiver>
     </application>

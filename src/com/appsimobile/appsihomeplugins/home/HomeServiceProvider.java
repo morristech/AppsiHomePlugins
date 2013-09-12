@@ -22,6 +22,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.util.SparseArray;
@@ -85,7 +86,6 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
 
     @Override
     public void onCreate() {
-        Log.d("HomeServiceProvider", "oncreate");
         super.onCreate();
 
         mDashClockHomeExtensions.put(DashClockHomeExtension.DASHCLOCK_EXTENSION_CALENDAR, new CalendarExtension(this));
@@ -121,7 +121,7 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
                 createMissedCallCountValues(builder);
                 break;
             case FIELD_TETHERING_INFO:
-                createTetheringFields(builder);
+                createWifiFields(builder);
                 break;
             default:
                 mDashClockHomeExtensions.get(fieldId).onUpdateData(builder);
@@ -148,16 +148,7 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
     }
 
 
-    private void createTetheringFields(FieldValues.Builder builder) {
-        ComponentName comp = new ComponentName("com.android.settings", "com.android.settings.TetherSettings");
-
-        Intent intent = new Intent();
-        intent.setComponent(comp);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, FIELD_TETHERING_INFO, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-
-        builder.intent(pendingIntent);
-
+    private void createWifiFields(FieldValues.Builder builder) {
         WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
 
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
@@ -180,12 +171,16 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
                 Scanner connectionsScanner = new Scanner(new File("/proc/net/arp"));
 
                 Integer connectionsCount = 0;
-                while (connectionsScanner.hasNextLine()) {
-                    connectionsScanner.nextLine();
-                    connectionsCount++;
+                try {
+                    while (connectionsScanner.hasNextLine()) {
+                        connectionsScanner.nextLine();
+                        connectionsCount++;
+                    }
+                    // remove header line
+                    connectionsCount = connectionsCount - 1;
+                } finally {
+                    connectionsScanner.close();
                 }
-                // remove header line
-                connectionsCount = connectionsCount - 1;
 
                 String text = getResources().getQuantityString(R.plurals.connection_count, connectionsCount, connectionsCount);
                 builder.text(text);
@@ -193,7 +188,13 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
                 Method getWifiApConfiguration = WifiManager.class.getDeclaredMethod("getWifiApConfiguration");
                 builder.header(((WifiConfiguration) getWifiApConfiguration.invoke(wifiManager)).SSID);
 
-                connectionsScanner.close();
+                ComponentName comp = new ComponentName("com.android.settings", "com.android.settings.TetherSettings");
+
+                Intent intent = new Intent();
+                intent.setComponent(comp);
+                PendingIntent pendingIntent = PendingIntent.getActivity(this, FIELD_TETHERING_INFO, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                builder.intent(pendingIntent);
+
             } catch (IOException e) {
                 Log.e("HomeServiceProvider", "error reading from /proc/net/arp", e);
             } catch (Exception e) {
@@ -256,23 +257,34 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
                     builder.text(getString(connectionStatusResId));
                 }
             }
+            Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, FIELD_TETHERING_INFO, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            builder.intent(pendingIntent);
+
+
         } else {
+            Intent intent = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, FIELD_TETHERING_INFO, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            builder.intent(pendingIntent);
+
+
             ConnectivityManager conMgr =  (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
             NetworkInfo i = conMgr.getActiveNetworkInfo();
 
-            boolean isConnected = i.isConnected();
+            boolean isConnected = i != null && i.isConnected();
 
 
             if (!isConnected) {
-                Bitmap icon = BitmapFactory.decodeResource(getResources(), wifiApEnabled ? R.drawable.ic_plugin_tethering : R.drawable.ic_settings_wireless);
                 builder.header(getString(R.string.no_connections));
                 builder.text("--");
+                builder.leftImageResId(R.drawable.ic_disconnected);
                 return;
             }
 
             int titleResId = 0;
             int imageResId = 0;
             int textResId = 0;
+            boolean useSubTypeAsDescription = false;
 
             switch (i.getType()) {
                 case ConnectivityManager.TYPE_ETHERNET:
@@ -281,13 +293,15 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
                     break;
                 case ConnectivityManager.TYPE_WIFI:
                     titleResId = R.string.conn_wifi;
-                    imageResId = R.drawable.ic_settings_wireless;
+                    imageResId = R.drawable.ic_mobile_conn;
                     break;
                 case ConnectivityManager.TYPE_MOBILE:
                     titleResId = R.string.conn_mobile;
                     imageResId = R.drawable.ic_settings_data;
                     if (i.isRoaming()) {
                         textResId = R.string.roaming;
+                    } else {
+                        useSubTypeAsDescription = true;
                     }
                     break;
                 case ConnectivityManager.TYPE_WIMAX:
@@ -302,10 +316,10 @@ public class HomeServiceProvider extends AppsiHomeServiceProvider {
 
             builder.leftImageResId(imageResId);
             builder.header(titleResId == 0 ? "--" : getString(titleResId));
-            builder.text(textResId == 0 ? "--" : getString(textResId));
+            String alt = useSubTypeAsDescription ? i.getSubtypeName() : "--";
+            builder.text(textResId == 0 ? alt : getString(textResId));
+
             return;
-
-
         }
         int icon = wifiApEnabled ? R.drawable.ic_plugin_tethering : R.drawable.ic_settings_wireless;
         builder.leftImageResId(icon);
